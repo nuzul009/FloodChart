@@ -1,154 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flood Chart</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flood Monitoring Chart</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <style>
-      body {
-        margin: 0;
-        background: #eef4ff;
-        font-family: "Segoe UI", sans-serif;
-      }
+  <style>
+    body {
+      margin: 0;
+      background: #eef4ff;
+      font-family: "Segoe UI", sans-serif;
+    }
+    .header {
+      background: linear-gradient(135deg, #0066ff, #00c8ff);
+      padding: 18px;
+      text-align: center;
+      color: white;
+      font-size: 22px;
+      font-weight: bold;
+    }
+    .container {
+      width: 92%;
+      max-width: 1100px;
+      margin: auto;
+      margin-top: 25px;
+    }
+    .chart-card {
+      background: white;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 25px rgba(0,0,0,0.1);
+      transition: 0.2s;
+    }
+    .chart-card:hover {
+      transform: scale(1.01);
+    }
+  </style>
+</head>
 
-      .header {
-        background: linear-gradient(135deg, #0066ff, #00c8ff);
-        padding: 18px;
-        text-align: center;
-        color: white;
-        font-size: 22px;
-        font-weight: bold;
-      }
+<body>
+  <div class="header">📊 Flood Monitoring Chart</div>
 
-      .container {
-        width: 92%;
-        max-width: 1100px;
-        margin: auto;
-        margin-top: 25px;
-      }
-
-      .chart-card {
-        background: white;
-        padding: 25px;
-        border-radius: 16px;
-        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
-        transition: 0.2s;
-      }
-
-      .chart-card:hover {
-        transform: scale(1.01);
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="header">📊 Flood Monitoring Chart</div>
-
-    <div class="container">
-      <div class="chart-card">
-        <canvas id="waterChart" height="130"></canvas>
-      </div>
+  <div class="container">
+    <div class="chart-card">
+      <canvas id="waterChart" height="130"></canvas>
     </div>
+  </div>
 
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-      import {
-        getDatabase,
-        ref,
-        onValue,
-        set,
-      } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+  <script type="module">
+    // =============================
+    // FIREBASE SETUP
+    // =============================
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
 
-      // Konfigurasi Firebase
-      const firebaseConfig = {
-        apiKey: "AIzaSyBfl6c9wZk-KtF6SI1SepauIlgB1xxrR5w",
-        authDomain: "watchflooood.firebaseapp.com",
-        databaseURL: "https://watchflooood-default-rtdb.firebaseio.com",
-        projectId: "watchflooood",
-        storageBucket: "watchflooood.firebasestorage.app",
-        messagingSenderId: "433015826288",
-        appId: "1:433015826288:web:79d5f44884921b267c91b5",
-      };
+    const firebaseConfig = {
+      apiKey: "AIzaSyBfl6c9wZk-KtF6SI1SepauIlgB1xxrR5w",
+      authDomain: "watchflooood.firebaseapp.com",
+      databaseURL: "https://watchflooood-default-rtdb.firebaseio.com",
+      projectId: "watchflooood",
+      storageBucket: "watchflooood.firebasestorage.app",
+      messagingSenderId: "433015826288",
+      appId: "1:433015826288:web:79d5f44884921b267c91b5"
+    };
 
-      const app = initializeApp(firebaseConfig);
-      const db = getDatabase(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-      const refJarak = ref(db, "Sensor/Jarak");
-      const refReset = ref(db, "Command/Reset");
+    const refJarak = ref(db, "Sensor/Jarak");
+    const refReset = ref(db, "Command/Reset");
 
-      // =============================
-      // CHART PREMIUM
-      // =============================
-      const ctx = document.getElementById("waterChart").getContext("2d");
+    // =============================
+    // CHART SETUP
+    // =============================
+    const ctx = document.getElementById("waterChart").getContext("2d");
 
-      const waterChart = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: [],
-          datasets: [
-            {
-              label: "Water Level (cm)",
-              data: [],
-              borderColor: "#007bff",
-              backgroundColor: "rgba(0, 123, 255, 0.25)",
-              borderWidth: 3,
-              tension: 0.35,
-              fill: true,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          animations: {
-            tension: {
-              duration: 900,
-              easing: "easeOutQuad",
-              from: 1,
-              to: 0.35,
-            },
-          },
-          scales: {
-            y: { beginAtZero: true, max: 100 },
-          },
-        },
-      });
+    const waterChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: [],
+        datasets: [{
+          label: "Water Level (cm)",
+          data: [],
+          borderColor: "#007bff",
+          backgroundColor: "rgba(0,123,255,0.25)",
+          borderWidth: 3,
+          tension: 0.35,
+          fill: true,
+        }],
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100
+          }
+        }
+      }
+    });
 
-      function resetChart() {
-        waterChart.data.labels = [];
-        waterChart.data.datasets[0].data = [];
-        waterChart.update();
+    // =============================
+    // FUNGSI RESET CHART
+    // =============================
+    function resetChart() {
+      waterChart.data.labels = [];
+      waterChart.data.datasets[0].data = [];
+      waterChart.update();
+    }
+
+    // =============================
+    // BACA DATA SENSOR REAL-TIME
+    // =============================
+    onValue(refJarak, snapshot => {
+      const jarak = snapshot.val();
+      if (jarak === null) return;
+
+      const tinggiAir = 100 - jarak;
+      const waktu = new Date().toLocaleTimeString();
+
+      // Batas maksimal data agar tidak berat
+      const MAX_DATA = 20;
+
+      waterChart.data.labels.push(waktu);
+      waterChart.data.datasets[0].data.push(tinggiAir);
+
+      if (waterChart.data.labels.length > MAX_DATA) {
+        waterChart.data.labels.shift();
+        waterChart.data.datasets[0].data.shift();
       }
 
-      // =============================
-      // READ SENSOR DATA
-      // =============================
-      onValue(refJarak, (snapshot) => {
-        const jarak = snapshot.val();
-        if (jarak === null) return;
+      waterChart.update();
+    });
 
-        const tinggiAir = 100 - jarak;
-        const waktu = new Date().toLocaleTimeString();
-
-        // Tambah data ke chart
-        waterChart.data.labels.push(waktu);
-        waterChart.data.datasets[0].data.push(tinggiAir);
-        waterChart.update();
-      });
-
-      // =============================
-      // RESET CHART VIA FIREBASE
-      // =============================
-      onValue(refReset, (snapshot) => {
-        if (snapshot.val() === 1) {
-          resetChart();
-          set(refReset, 0); // Set kembali ke 0
-        }
-      });
-    </script>
-  </body>
+    // =============================
+    // LISTENER UNTUK RESET CHART
+    // =============================
+    onValue(refReset, snapshot => {
+      if (snapshot.val() === 1) {
+        resetChart();
+        set(refReset, 0);
+      }
+    });
+  </script>
+</body>
 </html>
-
-
-
