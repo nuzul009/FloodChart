@@ -1,3 +1,6 @@
+<!-- === WAJIB: Chart.js === -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script type="module">
   // =============================
   // FIREBASE SETUP
@@ -24,7 +27,13 @@
   // =============================
   // CHART SETUP
   // =============================
-  const ctx = document.getElementById("waterChart").getContext("2d");
+  const canvas = document.getElementById("waterChart");
+
+  if (!canvas) {
+    console.error("ERROR: Canvas 'waterChart' tidak ditemukan!");
+  }
+
+  const ctx = canvas.getContext("2d");
 
   const waterChart = new Chart(ctx, {
     type: "line",
@@ -64,28 +73,21 @@
   // =============================
   // REALTIME SENSOR HANDLER
   // =============================
-  const tinggiBak = 100; 
+  const tinggiBak = 100;
 
   onValue(refJarak, snapshot => {
     let jarak = snapshot.val();
 
-    // --- Validasi Data ---
-    if (jarak === null || jarak === undefined) return;
-    if (isNaN(jarak)) return;
+    if (jarak === null || jarak === undefined || isNaN(jarak)) return;
 
-    // --- Hitung tinggi air ---
     let tinggiAir = tinggiBak - jarak;
-
-    // Proteksi nilai
     tinggiAir = Math.max(0, Math.min(tinggiAir, tinggiBak));
 
-    // --- Update Chart ---
     const waktu = new Date().toLocaleTimeString();
 
     waterChart.data.labels.push(waktu);
     waterChart.data.datasets[0].data.push(tinggiAir);
 
-    // Batas 20 data
     if (waterChart.data.labels.length > 20) {
       waterChart.data.labels.shift();
       waterChart.data.datasets[0].data.shift();
