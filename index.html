@@ -119,10 +119,7 @@ onValue(refJarak, snapshot => {
   const jarak = snapshot.val();
   if (jarak === null) return;
 
-  let tinggiAir = tinggiBak - jarak;
-
-  if (tinggiAir < 0) tinggiAir = 0;      // kalau negatif → jadi 0
-  if (tinggiAir > tinggiBak) tinggiAir = tinggiBak; // kalau lebih besar → set ke max
+  let tinggiAir = jarak;  
 
   const waktu = new Date().toLocaleTimeString();
 
