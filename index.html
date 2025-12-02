@@ -113,26 +113,30 @@
     // =============================
     // BACA DATA SENSOR REAL-TIME
     // =============================
-    onValue(refJarak, snapshot => {
-      const jarak = snapshot.val();
-      if (jarak === null) return;
+    const tinggiBak = 30; // ubah sesuai tinggi asli bak/air
 
-      const tinggiAir = 100 - jarak;
-      const waktu = new Date().toLocaleTimeString();
+onValue(refJarak, snapshot => {
+  const jarak = snapshot.val();
+  if (jarak === null) return;
 
-      // Batas maksimal data agar tidak berat
-      const MAX_DATA = 20;
+  let tinggiAir = tinggiBak - jarak;
 
-      waterChart.data.labels.push(waktu);
-      waterChart.data.datasets[0].data.push(tinggiAir);
+  if (tinggiAir < 0) tinggiAir = 0;      // kalau negatif → jadi 0
+  if (tinggiAir > tinggiBak) tinggiAir = tinggiBak; // kalau lebih besar → set ke max
 
-      if (waterChart.data.labels.length > MAX_DATA) {
-        waterChart.data.labels.shift();
-        waterChart.data.datasets[0].data.shift();
-      }
+  const waktu = new Date().toLocaleTimeString();
 
-      waterChart.update();
-    });
+  waterChart.data.labels.push(waktu);
+  waterChart.data.datasets[0].data.push(tinggiAir);
+
+  if (waterChart.data.labels.length > 20) {
+    waterChart.data.labels.shift();
+    waterChart.data.datasets[0].data.shift();
+  }
+
+  waterChart.update();
+});
+
 
     // =============================
     // LISTENER UNTUK RESET CHART
@@ -146,3 +150,4 @@
   </script>
 </body>
 </html>
+
