@@ -115,7 +115,7 @@
     if (isNaN(jarak)) return;
 
     // --- Hitung tinggi air ---
-    let tinggiAir = tinggiBak - jarak;
+    let tinggiAir = jarak;
 
     // Proteksi nilai
     tinggiAir = Math.max(0, Math.min(tinggiAir, tinggiBak));
@@ -145,4 +145,5 @@
     }
   });
 </script>
+
 
