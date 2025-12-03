@@ -105,35 +105,21 @@
   // =============================
   // REALTIME SENSOR HANDLER
   // =============================
-  const tinggiBak = 100; 
-
+  const tinggiBak = 100; // ubah sesuai tinggi asli bak/air
   onValue(refJarak, snapshot => {
-    let jarak = snapshot.val();
-
-    // --- Validasi Data ---
-    if (jarak === null || jarak === undefined) return;
-    if (isNaN(jarak)) return;
-
-    // --- Hitung tinggi air ---
+    const jarak = snapshot.val();
+    if (jarak === null) return;
     let tinggiAir = jarak;
-
-    // Proteksi nilai
-    tinggiAir = Math.max(0, Math.min(tinggiAir, tinggiBak));
-
-    // --- Update Chart ---
+    if (tinggiAir < 0) tinggiAir = 0; // kalau negatif → jadi 0 
+    if (tinggiAir > tinggiBak) tinggiAir = tinggiBak; // kalau lebih besar → set ke max 
     const waktu = new Date().toLocaleTimeString();
-
     waterChart.data.labels.push(waktu);
     waterChart.data.datasets[0].data.push(tinggiAir);
-
-    // Batas 20 data
     if (waterChart.data.labels.length > 20) {
       waterChart.data.labels.shift();
       waterChart.data.datasets[0].data.shift();
     }
-
-    waterChart.update();
-  });
+    waterChart.update(); });
 
   // =============================
   // RESET LISTENER
@@ -145,5 +131,6 @@
     }
   });
 </script>
+
 
 
