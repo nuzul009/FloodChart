@@ -1,3 +1,4 @@
+<!DOCTYPE html> <html lang="en"> <head> <meta charset="UTF-8" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <title>Flood Monitoring Chart</title> <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <style> body { margin: 0; background: #eef4ff; font-family: "Segoe UI", sans-serif; } .header { background: linear-gradient(135deg, #0066ff, #00c8ff); padding: 18px; text-align: center; color: white; font-size: 22px; font-weight: bold; } .container { width: 92%; max-width: 1100px; margin: auto; margin-top: 25px; } .chart-card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 25px rgba(0,0,0,0.1); transition: 0.2s; } .chart-card:hover { transform: scale(1.01); } </style> </head> <body> <div class="header">📊 Flood Monitoring Chart</div> <div class="container"> <div class="chart-card"> <canvas id="waterChart" height="130"></canvas> </div> </div>
 <script type="module">
   // =============================
   // FIREBASE SETUP
@@ -104,3 +105,4 @@
     }
   });
 </script>
+
