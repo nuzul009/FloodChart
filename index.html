@@ -1,26 +1,9 @@
-<!-- WAJIB: Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script type="module">
-document.addEventListener("DOMContentLoaded", () => {
-
-  // Pastikan canvas ada
-  const canvas = document.getElementById("waterChart");
-  if (!canvas) {
-    console.error("Canvas waterChart TIDAK ditemukan!");
-    return;
-  }
-
-  const ctx = canvas.getContext("2d");
-
-  // Firebase setup
-  import {
-    initializeApp
-  } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-
-  import {
-    getDatabase, ref, onValue, set
-  } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+  // =============================
+  // FIREBASE SETUP
+  // =============================
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+  import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBfl6c9wZk-KtF6SI1SepauIlgB1xxrR5w",
@@ -38,9 +21,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const refJarak = ref(db, "Sensor/Jarak");
   const refReset = ref(db, "Command/Reset");
 
-  console.log("Firebase connected, Chart.js loaded.");
+  // =============================
+  // CHART SETUP
+  // =============================
+  const ctx = document.getElementById("waterChart").getContext("2d");
 
-  // Chart
   const waterChart = new Chart(ctx, {
     type: "line",
     data: {
@@ -51,8 +36,9 @@ document.addEventListener("DOMContentLoaded", () => {
         borderColor: "#007bff",
         backgroundColor: "rgba(0,123,255,0.25)",
         borderWidth: 3,
-        fill: true
-      }]
+        tension: 0.35,
+        fill: true,
+      }],
     },
     options: {
       responsive: true,
@@ -66,23 +52,40 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  const tinggiBak = 100;
+  // =============================
+  // RESET CHART
+  // =============================
+  function resetChart() {
+    waterChart.data.labels = [];
+    waterChart.data.datasets[0].data = [];
+    waterChart.update();
+  }
 
-  // Listener realtime
+  // =============================
+  // REALTIME SENSOR HANDLER
+  // =============================
+  const tinggiBak = 100; 
+
   onValue(refJarak, snapshot => {
-    const jarak = Number(snapshot.val());
+    let jarak = snapshot.val();
 
-    if (isNaN(jarak)) {
-      console.warn("Data jarak tidak valid:", snapshot.val());
-      return;
-    }
+    // --- Validasi Data ---
+    if (jarak === null || jarak === undefined) return;
+    if (isNaN(jarak)) return;
 
-    const tinggiAir = Math.max(0, Math.min(tinggiBak - jarak, tinggiBak));
+    // --- Hitung tinggi air ---
+    let tinggiAir = tinggiBak - jarak;
+
+    // Proteksi nilai
+    tinggiAir = Math.max(0, Math.min(tinggiAir, tinggiBak));
+
+    // --- Update Chart ---
     const waktu = new Date().toLocaleTimeString();
 
     waterChart.data.labels.push(waktu);
     waterChart.data.datasets[0].data.push(tinggiAir);
 
+    // Batas 20 data
     if (waterChart.data.labels.length > 20) {
       waterChart.data.labels.shift();
       waterChart.data.datasets[0].data.shift();
@@ -91,15 +94,13 @@ document.addEventListener("DOMContentLoaded", () => {
     waterChart.update();
   });
 
-  // Reset chart listener
+  // =============================
+  // RESET LISTENER
+  // =============================
   onValue(refReset, snapshot => {
     if (snapshot.val() === 1) {
-      waterChart.data.labels = [];
-      waterChart.data.datasets[0].data = [];
-      waterChart.update();
+      resetChart();
       set(refReset, 0);
     }
   });
-
-});
 </script>
